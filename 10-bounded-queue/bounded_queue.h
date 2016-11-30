@@ -14,12 +14,7 @@ public:
     {
         std::unique_lock<std::mutex> lock { _mtx };
 
-        while(_size == N)
-        {
-            _full_queue.wait(lock);
-        }
-
-
+        _full_queue.wait(lock, [&](){ return _size == 0; });
 
         _buffer.at(_back) = std::move(t);
         _back = (_back + 1) % N;
@@ -31,10 +26,9 @@ public:
     {
         std::unique_lock<std::mutex> lock { _mtx };
 
-        while(_size == 0)
-        {
-            _empty_queue.wait(lock);
-        }
+
+        _empty_queue.wait(lock, [&]() { return _size != 0; });
+
 
         auto ret = _buffer.at(_front);
         _front = (_front + 1) % N;
