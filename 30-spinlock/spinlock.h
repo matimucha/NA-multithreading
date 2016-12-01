@@ -9,8 +9,8 @@ public:
     {
         while(!try_lock())
         {
-            _locked = true;
         }
+
     }
     bool try_lock()
     {
