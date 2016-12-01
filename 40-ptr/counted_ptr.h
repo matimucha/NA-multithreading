@@ -16,7 +16,7 @@ public:
     {
         _state = other._state;
         _cache = other._cache;
-        acquire();
+        _acquire();
     }
 
     counted_ptr(counted_ptr && other)
@@ -28,7 +28,7 @@ public:
     }
     counted_ptr & operator=(const counted_ptr & other)
     {
-        release();
+        _release();
         _state = other._state;
         _cache = other._cache;
         if(_state)
@@ -40,7 +40,7 @@ public:
     }
     counted_ptr & operator=(counted_ptr && other)
     {
-        release();
+        _release();
 
         _state = other._state;
         _cache = other._cache;
@@ -49,9 +49,24 @@ public:
 
         return *this;
     }
-    ~counted_ptr();
+    ~counted_ptr()
+    {
+        _release();
+    }
 
-    void reset(T * ptr = nullptr);
+    void reset(T * ptr = nullptr)
+    {
+        _release();
+        if(!ptr)
+        {
+            _state = nullptr;
+            _cache = nullptr;
+        }
+
+        _state = new _shared_state{ ptr };
+        _cache = ptr;
+    }
+
     T * get() const
     {
         return _cache;
@@ -74,7 +89,7 @@ private:
     };
 
     _shared_state * _state = nullptr;
-    T* _cache;
+    T* _cache = nullptr;
 
     void _acquire()
     {
