@@ -7,8 +7,10 @@ class spinlock
 public:
     void lock()
     {
-        assert(!_locked);
-        _locked = true;
+        while(!try_lock())
+        {
+            _locked = true;
+        }
     }
     bool try_lock()
     {
